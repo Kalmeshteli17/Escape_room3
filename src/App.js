@@ -65,7 +65,7 @@ const App = () => {
 
     // Model Loading (Room)
     const loader = new GLTFLoader();
-    const modelUrl = new URL("https://escape-room3.vercel.app/scene_pro2.glb", import.meta.url);
+    const modelUrl = "https://escape-room3.vercel.app/scene_pro2.glb";
 
     loader.load(
       modelUrl.href,
