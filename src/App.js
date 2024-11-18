@@ -17,7 +17,7 @@ const App = () => {
 
     // Scene and Renderer setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color("0x87ceeb");
+    scene.background = new THREE.Color("red");
 
     const camera = new THREE.PerspectiveCamera(
       75,
