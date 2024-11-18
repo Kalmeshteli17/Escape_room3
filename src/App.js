@@ -77,7 +77,7 @@ const App = () => {
     // Model Loading (Room)
 
     // const loader = new GLTFLoader();
-    const modelUrl = new URL("./scene_pro4.glb", import.meta.url);
+    const modelUrl = new URL("/scene_pro4.glb", import.meta.url);
 
     loader.load(
       modelUrl.href,
