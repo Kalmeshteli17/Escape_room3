@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 import GUI from "lil-gui";
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 
 const App = () => {
   const canvasRef = useRef(null);
@@ -65,7 +66,18 @@ const App = () => {
 
     // Model Loading (Room)
     const loader = new GLTFLoader();
-    const modelUrl = "https://escape-room3.vercel.app/scene_pro2.glb";
+    const dracoLoader = new DRACOLoader();
+
+    // Specify the path to Draco decoder files (adjust path if needed)
+    dracoLoader.setDecoderPath(
+      "https://www.gstatic.com/draco/versioned/decoders/1.5.6/"
+    ); // Use Google's hosted version or your local path
+    loader.setDRACOLoader(dracoLoader);
+
+    // Model Loading (Room)
+
+    // const loader = new GLTFLoader();
+    const modelUrl = new URL("./scene_pro4.glb", import.meta.url);
 
     loader.load(
       modelUrl.href,
@@ -269,6 +281,14 @@ const App = () => {
       requestAnimationFrame(tick);
     };
     tick();
+
+    document.addEventListener("pointerlockchange", () => {
+      if (document.pointerLockElement === canvasRef.current) {
+        console.log("Pointer lock engaged");
+      } else {
+        console.log("Pointer lock released");
+      }
+    });
 
     const handleResize = () => {
       sizes.width = window.innerWidth;
