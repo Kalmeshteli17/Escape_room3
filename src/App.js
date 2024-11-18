@@ -17,7 +17,7 @@ const App = () => {
 
     // Scene and Renderer setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x87ceeb);
+    scene.background = new THREE.Color("0x87ceeb");
 
     const camera = new THREE.PerspectiveCamera(
       75,
@@ -77,7 +77,7 @@ const App = () => {
     // Model Loading (Room)
 
     // const loader = new GLTFLoader();
-    const modelUrl = new URL("./scene_pro4.glb", import.meta.url);
+    const modelUrl = new URL("scene_pro4.glb", import.meta.url);
 
     loader.load(
       modelUrl.href,
