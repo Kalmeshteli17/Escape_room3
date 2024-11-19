@@ -1,10 +1,9 @@
-// App.js
 import React, { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
-import GUI from "lil-gui";
-import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
+import PuzzleOne from "./PuzzleOne";
+
 
 const App = () => {
   const canvasRef = useRef(null);
@@ -17,15 +16,10 @@ const App = () => {
 
     // Scene and Renderer setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color("red");
+    scene.background = new THREE.Color(0x87ceeb);
 
-    const camera = new THREE.PerspectiveCamera(
-      75,
-      sizes.width / sizes.height,
-      0.1,
-      1000
-    );
-    camera.position.set(0, 1.2, -2); // Adjusted camera height for first-person perspective
+    const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 1000);
+    camera.position.set(0, 1.2, -2);
     scene.add(camera);
 
     const renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current });
@@ -33,51 +27,17 @@ const App = () => {
 
     // PointerLockControls
     const controls = new PointerLockControls(camera, renderer.domElement);
-    canvasRef.current.addEventListener("click", () => controls.lock());
+    canvasRef.current.addEventListener("click", () => {
+      controls.lock();
+    });
 
     // Lights
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-    directionalLight.position.set(5, 5, 5);
-    directionalLight.castShadow = true;
-    scene.add(directionalLight);
-
-    // GUI Controls
-    const gui = new GUI();
-    const ambientFolder = gui.addFolder("Ambient Light");
-    ambientFolder.add(ambientLight, "intensity", 0, 1, 0.01).name("Intensity");
-
-    const dirLightFolder = gui.addFolder("Directional Light");
-    dirLightFolder
-      .add(directionalLight.position, "x", -10, 10, 0.1)
-      .name("Position X");
-    dirLightFolder
-      .add(directionalLight.position, "y", -10, 10, 0.1)
-      .name("Position Y");
-    dirLightFolder
-      .add(directionalLight.position, "z", -10, 10, 0.1)
-      .name("Position Z");
-    dirLightFolder
-      .add(directionalLight, "intensity", 0, 2, 0.01)
-      .name("Intensity");
-    dirLightFolder.close(); // Close Directional Light folder by default
-
-    // Model Loading (Room)
+    // Load Model
     const loader = new GLTFLoader();
-    const dracoLoader = new DRACOLoader();
-
-    // Specify the path to Draco decoder files (adjust path if needed)
-    dracoLoader.setDecoderPath(
-      "https://www.gstatic.com/draco/versioned/decoders/1.5.6/"
-    ); // Use Google's hosted version or your local path
-    loader.setDRACOLoader(dracoLoader);
-
-    // Model Loading (Room)
-
-    // const loader = new GLTFLoader();
-    const modelUrl = new URL("../public/scene_pro5.glb", import.meta.url);
+    const modelUrl = new URL("./scene_pro2.glb", import.meta.url);
 
     loader.load(
       modelUrl.href,
@@ -87,129 +47,65 @@ const App = () => {
       },
       undefined,
       (error) => {
-        console.error("An error occurred while loading the GLB model:", error);
+        console.error("Error loading the GLB model:", error);
       }
     );
 
-    /*
-    // Chair Model Loading
-    const chairLoader = new GLTFLoader();
-    const chairModelUrl = new URL("./furniture1.glb", import.meta.url);
+    // Doors and Bounding Boxes
+    const doors = [];
 
-    chairLoader.load(
-      chairModelUrl.href,
-      (gltf) => {
-        const chair = gltf.scene;
-        chair.position.set(-10.1, 0, 0.85); // Position it in front of the camera
-        chair.scale.set(1, 1, 1);
-        scene.add(chair);
-        console.log("Chair model loaded successfully");
-      },
-      undefined,
-      (error) => {
-        console.error(
-          "An error occurred while loading the chair model:",
-          error
-        );
-      }
-    );
+    // Add door_1 (plane)
+    const geometry = new THREE.PlaneGeometry(1, 2);
+    const material = new THREE.MeshBasicMaterial({ color: 0xff0000, side: THREE.DoubleSide });
+    const door1 = new THREE.Mesh(geometry, material);
+    door1.position.set(0, 1, 4.178);
+    door1.scale.set(1, 2, 1);
+    door1.name = "door_1";
+    scene.add(door1);
+    doors.push(new THREE.Box3().setFromObject(door1));
 
-    // workbench Model Loading
-    const workbenchLoader = new GLTFLoader();
-    const workbenchModelUrl = new URL("./workbench.glb", import.meta.url);
+    // Add door_2 (plane)
+    const geometry2 = new THREE.PlaneGeometry(1, 2);
+    const material2 = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide });
+    const door2 = new THREE.Mesh(geometry2, material2);
+    door2.position.set(-6.740, 1, 4.178);
+    door2.scale.set(1, 2, 1);
+    door2.name = "door_2";
+    scene.add(door2);
+    doors.push(new THREE.Box3().setFromObject(door2));
 
-    workbenchLoader.load(
-      workbenchModelUrl.href,
-      (gltf) => {
-        const workbench = gltf.scene;
-        workbench.position.set(-10, 0, 8); // Position it in front of the camera
-        workbench.scale.set(1, 1, 1);
-        scene.add(workbench);
-        console.log("workbench model loaded successfully");
-      },
-      undefined,
-      (error) => {
-        console.error(
-          "An error occurred while loading the workbench model:",
-          error
-        );
-      }
-    );
+    // Add door_3 (plane)
+    const geometry3 = new THREE.PlaneGeometry(1, 2);
+    const material3 = new THREE.MeshBasicMaterial({ color: 0x0000ff, side: THREE.DoubleSide });
+    const door3 = new THREE.Mesh(geometry3, material3);
+    door3.position.set(-3.641, 1, 10.861);
+    door3.scale.set(1, 2, 1);
+    door3.rotation.set(0, THREE.MathUtils.degToRad(90), 0);
+    door3.name = "door_3";
+    scene.add(door3);
+    doors.push(new THREE.Box3().setFromObject(door3));
 
-    // drawer Model Loading
-    const drawerLoader = new GLTFLoader();
-    const drawerModelUrl = new URL("./furniture2.glb", import.meta.url);
+    // Walls/Obstacles for collision
+    const obstacles = [];
 
-    drawerLoader.load(
-      drawerModelUrl.href,
-      (gltf) => {
-        const drawer = gltf.scene;
-        drawer.position.set(-5.5, 0,4.09); // Position it in front of the camera
-        drawer.scale.set(0.5,0.5,0.5);
-        scene.add(drawer);
-        console.log("drawer model loaded successfully");
-      },
-      undefined,
-      (error) => {
-        console.error("An error occurred while loading the drawer model:", error);
-      }
-    );
+    // Wall 1
+    const wallGeometry = new THREE.BoxGeometry(16.714, 2, 1);
+    const wallMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+    const wall1 = new THREE.Mesh(wallGeometry, wallMaterial);
+    wall1.position.set(3.630, 1.001, 4.223);
+    wall1.rotation.y = THREE.MathUtils.degToRad(90);
+    scene.add(wall1);
+    obstacles.push(new THREE.Box3().setFromObject(wall1));
 
+    // Wall 2
+    const wall2 = new THREE.Mesh(wallGeometry, wallMaterial);
+    wall2.position.set(-10.808, 1.001, 4.223);
+    wall2.rotation.y = THREE.MathUtils.degToRad(90);
+    scene.add(wall2);
+    obstacles.push(new THREE.Box3().setFromObject(wall2));
 
-    // bag Model Loading
-    const bagLoader = new GLTFLoader();
-    const bagModelUrl = new URL("./bag.glb", import.meta.url);
-
-    bagLoader.load(
-      bagModelUrl.href,
-      (gltf) => {
-        const bag = gltf.scene;
-        bag.position.set(-10.2, 0,6.5); // Position it in front of the camera
-        bag.scale.set(0.2,0.2,0.2);
-        scene.add(bag);
-        console.log("bag model loaded successfully");
-      },
-      undefined,
-      (error) => {
-        console.error("An error occurred while loading the bag model:", error);
-      }
-    );
-
-    */
-    // Raycaster for detecting mouse click coordinates
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-
-    const handleMouseClick = (event) => {
-      // Calculate mouse position in normalized device coordinates (-1 to +1)
-      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-      // Update raycaster with the mouse position and camera
-      raycaster.setFromCamera(mouse, camera);
-
-      // Find intersections
-      const intersects = raycaster.intersectObjects(scene.children, true);
-      if (intersects.length > 0) {
-        const intersect = intersects[0];
-        const { x, y, z } = intersect.point;
-        console.log(
-          `Mouse clicked at coordinates: x=${x.toFixed(2)}, y=${y.toFixed(
-            2
-          )}, z=${z.toFixed(2)}`
-        );
-      }
-    };
-
-    canvasRef.current.addEventListener("click", handleMouseClick);
-
-    // First-Person Movement
-    const movement = {
-      forward: false,
-      backward: false,
-      left: false,
-      right: false,
-    };
+    // Movement Controls
+    const movement = { forward: false, backward: false, left: false, right: false };
     const speed = 5;
 
     const handleKeyDown = (event) => {
@@ -249,7 +145,9 @@ const App = () => {
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
 
+    // Animation Loop
     const clock = new THREE.Clock();
+
     const tick = () => {
       const delta = clock.getDelta();
       const direction = new THREE.Vector3();
@@ -257,39 +155,60 @@ const App = () => {
       direction.y = 0;
       direction.normalize();
 
-      if (movement.forward)
-        controls
-          .getObject()
-          .position.add(direction.clone().multiplyScalar(speed * delta));
-      if (movement.backward)
-        controls
-          .getObject()
-          .position.add(direction.clone().multiplyScalar(-speed * delta));
-      const sideDirection = new THREE.Vector3()
-        .crossVectors(camera.up, direction)
-        .normalize();
-      if (movement.left)
-        controls
-          .getObject()
-          .position.add(sideDirection.multiplyScalar(speed * delta));
-      if (movement.right)
-        controls
-          .getObject()
-          .position.add(sideDirection.multiplyScalar(-speed * delta));
+      const nextPosition = controls.object.position.clone();
+
+      if (movement.forward) {
+        nextPosition.add(direction.clone().multiplyScalar(speed * delta));
+      }
+      if (movement.backward) {
+        nextPosition.add(direction.clone().multiplyScalar(-speed * delta));
+      }
+
+      const sideDirection = new THREE.Vector3().crossVectors(camera.up, direction).normalize();
+      if (movement.left) {
+        nextPosition.add(sideDirection.multiplyScalar(speed * delta));
+      }
+      if (movement.right) {
+        nextPosition.add(sideDirection.multiplyScalar(-speed * delta));
+      }
+
+      // Check for collisions with doors and walls
+      const playerBox = new THREE.Box3().setFromCenterAndSize(
+        nextPosition.clone(),
+        new THREE.Vector3(0.5, 1.8, 0.5) // Approximate player's size
+      );
+
+      let collision = false;
+      for (const doorBox of doors) {
+        if (playerBox.intersectsBox(doorBox)) {
+          collision = true;
+          break;
+        }
+      }
+
+      for (const obstacleBox of obstacles) {
+        if (playerBox.intersectsBox(obstacleBox)) {
+          collision = true;
+          break;
+        }
+      }
+
+      // Only update position if no collision
+      if (!collision) {
+        controls.object.position.copy(nextPosition);
+      }
 
       renderer.render(scene, camera);
       requestAnimationFrame(tick);
     };
+
     tick();
 
-    document.addEventListener("pointerlockchange", () => {
-      if (document.pointerLockElement === canvasRef.current) {
-        console.log("Pointer lock engaged");
-      } else {
-        console.log("Pointer lock released");
-      }
-    });
+    // Puzzle Initialization
+    const cleanupPuzzle = PuzzleOne(scene, doors);
 
+
+    // Handle Window Resize
     const handleResize = () => {
       sizes.width = window.innerWidth;
       sizes.height = window.innerHeight;
@@ -303,8 +222,7 @@ const App = () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
-      canvasRef.current.removeEventListener("click", handleMouseClick);
-      gui.destroy();
+      cleanupPuzzle();
     };
   }, []);
 
